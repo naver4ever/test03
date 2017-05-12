@@ -34,6 +34,8 @@ import javax.swing.SwingConstants;
 import java.awt.Font;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -267,9 +269,18 @@ public class EmployeeUI extends JFrame {
 					break;
 				}// end of switch
 				
-				String inputDate = 
+				String inputDate = tfDate.getText();
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				Date userDate;
+				try {
+					userDate = dateFormat.parse(inputDate);
+					newEmp.setJoindate(userDate);
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 				
-				newEmp.setJoindate(tfDate.getText());
+				int res = employeeService.insertEmployee(newEmp);
+				
 				
 				
 			}
