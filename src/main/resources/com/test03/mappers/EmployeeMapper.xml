@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test03.mappers.EmployeeMapper">
+	
+	<insert id="insertEmployee" parameterType="Employee">
+		insert into employee (eno, ename, salary, dno, gender, joindate, title) values
+		(#{eno}, #{ename}, #{salary}, #{dno}, #{gender}, #{joindate}, #{title})
+	</insert>
+	
+	<select id="findAllEmployee" resultType="employee">
+		select eno, ename, salary, dno, gender, joindate, title from employee
+	</select>
+	
+	<select id="findLastEmployee" resultType="employee">
+		select eno, ename, salary, dno, gender, joindate, title from employee order by eno desc limit 1
+	</select>
+	
+	
+	
+</mapper>
