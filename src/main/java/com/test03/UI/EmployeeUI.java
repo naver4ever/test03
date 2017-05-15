@@ -15,6 +15,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
 import javax.swing.JSpinner;
@@ -51,7 +52,11 @@ public class EmployeeUI extends JFrame {
 	private JPanel contentPane;
 	private JTextField tfNum;
 	private JTextField tfName;
-	private JTextField tfDate; 
+	private JTextField tfDate;
+	private JSpinner spinnerPay;
+	private ButtonGroup groupGender;
+	private JRadioButton radioMale;
+	private JRadioButton radioFemale;
 	
 	private JTable jTable = null;
 	private DefaultTableModel tableModel = null;
@@ -63,6 +68,7 @@ public class EmployeeUI extends JFrame {
 	
 	private String gender;
 	private int genderCode;
+	private String nowDate;
 
 	private static EmployeeService employeeService;
 
@@ -138,7 +144,7 @@ public class EmployeeUI extends JFrame {
 		lblPay.setBounds(217, 135, 57, 15);
 		contentPane.add(lblPay);
 		
-		JSpinner spinnerPay = new JSpinner();
+		spinnerPay = new JSpinner();
 		spinnerPay.setModel(new SpinnerNumberModel(1500000, 1000000, 5000000, 100000));
 		spinnerPay.setBounds(286, 132, 200, 22);
 		contentPane.add(spinnerPay);
@@ -149,19 +155,19 @@ public class EmployeeUI extends JFrame {
 		lblGender.setBounds(217, 160, 57, 15);
 		contentPane.add(lblGender);
 		
-		JRadioButton radioMale = new JRadioButton("남");
+		radioMale = new JRadioButton("남");
 		radioMale.setHorizontalAlignment(SwingConstants.RIGHT);
 		radioMale.setSelected(true);
 		radioMale.setBounds(282, 155, 43, 24);
 		
 		contentPane.add(radioMale);
 		
-		JRadioButton radioFemale = new JRadioButton("여");
+		radioFemale = new JRadioButton("여");
 		radioFemale.setHorizontalAlignment(SwingConstants.RIGHT);
 		radioFemale.setBounds(329, 155, 43, 24);
 		contentPane.add(radioFemale);
 		
-		ButtonGroup groupGender = new ButtonGroup();
+		groupGender = new ButtonGroup();
 		groupGender.add(radioMale);
 		groupGender.add(radioFemale);
 		
@@ -180,7 +186,7 @@ public class EmployeeUI extends JFrame {
 		//오늘 날짜
 		Calendar cal = Calendar.getInstance();
 		
-		String nowDate = String.format("%04d-%02d-%02d",
+		nowDate = String.format("%04d-%02d-%02d",
                 cal.get(Calendar.YEAR),
                 (cal.get(Calendar.MONTH) + 1),
                 cal.get(Calendar.DAY_OF_MONTH)
@@ -281,25 +287,25 @@ public class EmployeeUI extends JFrame {
 				
 				int res = employeeService.insertEmployee(newEmp);
 				
+				//사원추가후 입력필드 초기화
+				clearField();
+				
+				//사원목록 갱신
+				loadList();
 				
 				
-			}
+			}// end of btnAdd.addActionListener
 		});
 		btnAdd.setBounds(226, 270, 97, 23);
 		contentPane.add(btnAdd);
 		
 		
-		btnCancel = new JButton(" 취소");
+		btnCancel = new JButton("취소");
 		
 		//취소버튼 초기화
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				tfName.setText("");
-				spinnerPay.setValue(1500000);
-				radioMale.setSelected(true);
-				tfDate.setText(nowDate);
-				comboBoxPosition.setSelectedIndex(0);
-				comboBoxDept.setSelectedIndex(0);
+				clearField();
 			}
 		});
 		
@@ -316,36 +322,33 @@ public class EmployeeUI extends JFrame {
 		comboBoxDept.setBounds(286, 182, 200, 21);
 		contentPane.add(comboBoxDept);
 		
+		loadList();
+		
+	}
+	
+	public void clearField(){
+		tfName.setText("");
+		spinnerPay.setValue(1500000);
+		radioMale.setSelected(true);
+		tfDate.setText(nowDate);
+		comboBoxPosition.setSelectedIndex(0);
+		comboBoxDept.setSelectedIndex(0);
+	}
+	
+	public void loadList(){
+		List<Employee> empList = employeeService.findAllEmployee();
+		String[][] rowDatas = new String[empList.size()][];
+		for(int i=0;i<rowDatas.length;i++){
+			rowDatas[i] = empList.get(i).toArray();
+		}
 		
 		String columnNames[] = {"번호","사원명","직책","급여","성별","부서","입사일"};
-		Object data[][] = {{"E0000001","사장1","사장","5,000,000","남","경영(4층)","2002-05-05"},
-				{"E0000001","사장2","사장","5,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","사장3","사장","5,000,000","남","마케팅(10층)","2003-05-06"},
-				{"E0000001","사장4","사장","5,000,000","남","개발(9층)","2004-05-06"},
-				{"E0000001","사장5","사장","5,000,000","남","경영(4층)","2005-05-06"},
-				{"E0000001","부장1","부장","4,000,000","남","경영(4층)","2006-05-06"},
-				{"E0000001","부장2","부장","4,000,000","남","마케팅(10층)","2002-05-06"},
-				{"E0000001","부장3","부장","4,000,000","남","개발(9층)","2012-05-06"},
-				{"E0000001","부장4","부장","4,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","부장5","부장","4,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","과장1","과장","3,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","과장2","과장","3,000,000","남","마케팅(10층)","2002-05-06"},
-				{"E0000001","과장3","과장","3,000,000","남","개발(9층)","2002-05-06"},
-				{"E0000001","과장4","과장","3,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","과장5","과장","3,000,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","대리1","대리","2,500,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","대리2","대리","2,500,000","남","마케팅(10층)","2002-05-06"},
-				{"E0000001","대리3","대리","2,500,000","남","개발(9층)","2002-05-06"},
-				{"E0000001","대리4","대리","2,500,000","남","경영(4층)","2002-05-06"},
-				{"E0000001","대리5","대리","2,500,000","남","경영(4층)","2002-05-06"}};
 		
-		
-		tableModel = new DefaultTableModel(data, columnNames);
+		tableModel = new DefaultTableModel(rowDatas, columnNames);
 		jTable = new JTable(tableModel);
 		scpane = new JScrollPane(jTable);
 		scpane.setLocation(12, 325);
 		scpane.setSize(683, 269);
 		contentPane.add(scpane);
-		
 	}
 }
