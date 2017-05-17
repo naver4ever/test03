@@ -8,4 +8,7 @@ public interface EmployeeMapper {
 	int insertEmployee(Employee employee);
 	List<Employee> findAllEmployee();
 	Employee findLastEmployee();
+	int deleteEmployee(int eno);
+	Employee findEmployeeByEno(int eno);
+	int updateEmployee(Employee employee);
 }

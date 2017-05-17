@@ -23,4 +23,8 @@ public class Title {
 		return String.format("Title [tcode=%s, tname=%s]", tcode, tname);
 	}
 	
+	public String[] toArray() {
+		return new String[]{tcode+"", tname};
+	}
+	
 }

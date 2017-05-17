@@ -17,6 +17,19 @@
 		select eno, ename, salary, dno, gender, joindate, title from employee order by eno desc limit 1
 	</select>
 	
+	<select id="findEmployeeByEno" resultType="employee" parameterType="int">
+		select eno, ename, salary, dno, gender, joindate, title from employee where eno = #{eno}
+	</select>
+	
+	<delete id="deleteEmployee" parameterType="int">
+		delete from employee where eno = #{eno}
+	</delete>
+	
+	<update id="updateEmployee" parameterType="Employee">
+		update employee set eno=#{eno}, ename=#{ename}, salary=#{salary}, dno=#{dno}, gender=#{gender}, joindate=#{joindate} 
+		where eno=#{eno}
+	</update>
+	
 	
 	
 </mapper>

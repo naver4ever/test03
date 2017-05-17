@@ -28,5 +28,9 @@ public class Department {
 		return String.format("Department [dcode=%s, dname=%s, floor=%s]", dcode, dname, floor);
 	}
 	
+	public String[] toArray() {
+		return new String[]{dcode+"", dname, floor+""};
+	}
+	
 	
 }

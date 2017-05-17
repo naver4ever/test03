@@ -60,6 +60,51 @@ public class EmployeeService {
 		
 	}
 	
+	public int deleteEmployee(int eno){
+		logger.debug("deleteEmployee()");
+		SqlSession sqlSession = MyBatisSqlSessionFactory.openSession();
+		
+		try {
+			EmployeeMapper employeeMapper = sqlSession.getMapper(EmployeeMapper.class);
+			int res = employeeMapper.deleteEmployee(eno);
+			sqlSession.commit();
+			return res;
+		} finally {
+			sqlSession.close();
+		}
+		
+	}
+	
+	public Employee findEmployeeByEno(int eno){
+		SqlSession sqlSession = MyBatisSqlSessionFactory.openSession();
+		
+		try {
+			EmployeeMapper employeeMapper = sqlSession.getMapper(EmployeeMapper.class);
+			Employee findEmp = employeeMapper.findEmployeeByEno(eno);
+			return findEmp;
+		} finally {
+			sqlSession.close();
+		}
+	}
+	
+	public int updateEmployee(Employee employee){
+		logger.debug("updateEmployee()");
+		SqlSession sqlSession = MyBatisSqlSessionFactory.openSession();
+		
+		try{
+			EmployeeMapper employeeMapper = sqlSession.getMapper(EmployeeMapper.class);
+			int res = employeeMapper.updateEmployee(employee);
+			sqlSession.commit();
+			return res;
+		}catch(Exception e){
+			sqlSession.rollback();
+			e.printStackTrace();
+			throw new RuntimeException(e.getCause());
+		}finally{
+			sqlSession.close();
+		}
+	}
+	
 	
 	
 }

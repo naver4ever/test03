@@ -1,9 +1,11 @@
 package com.test03.UI;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -15,6 +17,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.awt.GridLayout;
@@ -35,6 +38,9 @@ import javax.swing.SwingConstants;
 import java.awt.Font;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -47,7 +53,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTable;
 
-public class EmployeeUI extends JFrame {
+public class EmployeeUI extends JFrame{
 
 	private JPanel contentPane;
 	private JTextField tfNum;
@@ -58,8 +64,8 @@ public class EmployeeUI extends JFrame {
 	private JRadioButton radioMale;
 	private JRadioButton radioFemale;
 	
-	private JTable jTable = null;
-	private DefaultTableModel tableModel = null;
+	private JTable jTable ;
+	private DefaultTableModel tableModel ;
 	private JScrollPane scpane;
 	private JButton btnAdd;
 	private JButton btnCancel;
@@ -69,8 +75,13 @@ public class EmployeeUI extends JFrame {
 	private String gender;
 	private int genderCode;
 	private String nowDate;
+	
+	private JPopupMenu popupMenu = new JPopupMenu();
+	private JMenuItem modifyMenu = new JMenuItem("수정");
+	private JMenuItem deleteMenu = new JMenuItem("삭제");
 
 	private static EmployeeService employeeService;
+	private List<Employee> empList;
 
 	/**
 	 * Launch the application.
@@ -203,99 +214,235 @@ public class EmployeeUI extends JFrame {
 		//사원 추가 이벤트
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Employee newEmp = new Employee();
-				newEmp.setEno(Integer.parseInt(tfNum.getText()));
-				newEmp.setEname(tfName.getText());
-				
-				switch (comboBoxPosition.getSelectedIndex()) {
-				case 0:
-					newEmp.setTitle(1);
-					break;
+				if(btnAdd.getText() == "추가"){
+					//추가 이벤트
+					Employee newEmp = new Employee();
+					newEmp.setEno(Integer.parseInt(tfNum.getText()));
+					newEmp.setEname(tfName.getText());
 					
-				case 1:
-					newEmp.setTitle(2);
-					break;
+					switch (comboBoxPosition.getSelectedIndex()) {
+					case 0:
+						newEmp.setTitle(1);
+						break;
+						
+					case 1:
+						newEmp.setTitle(2);
+						break;
+						
+					case 2:
+						newEmp.setTitle(3);
+						break;
+						
+					case 3:
+						newEmp.setTitle(4);
+						break;	
 					
-				case 2:
-					newEmp.setTitle(3);
-					break;
-					
-				case 3:
-					newEmp.setTitle(4);
-					break;	
-				
-				case 4:
-					newEmp.setTitle(5);
-					break;	
+					case 4:
+						newEmp.setTitle(5);
+						break;	
 
-				default:
-					break;
-				}// end of switch
-				
-				newEmp.setSalary(Integer.parseInt(spinnerPay.getValue().toString()));
-				
-				Enumeration<AbstractButton> enums = groupGender.getElements();
-				
-				while(enums.hasMoreElements()) {           
-				    AbstractButton ab = enums.nextElement();    
-				    JRadioButton jb = (JRadioButton)ab; 				 
-				    if(jb.isSelected())
-				    	gender = jb.getText().trim(); //getText() 메소드로 문자열 받아낸다.
-				}// end of while
-				
-				if(gender.equals("남")){
-					genderCode =1;
-				}else if(gender.equals("여")){
-					genderCode=2;
-				}
-				
-				newEmp.setGender(genderCode);
-				
-				switch (comboBoxDept.getSelectedIndex()) {
-				case 0:
-					newEmp.setDno(1);
-					break;
-				
-				case 1:
-					newEmp.setDno(2);
-					break;
-				
-				case 2:
-					newEmp.setDno(3);
-					break;
-				
-				case 3:
-					newEmp.setDno(4);
-					break;
+					default:
+						break;
+					}// end of switch
 					
-				case 4:
-					newEmp.setDno(5);
+					newEmp.setSalary(Integer.parseInt(spinnerPay.getValue().toString()));
+					
+					Enumeration<AbstractButton> enums = groupGender.getElements();
+					
+					while(enums.hasMoreElements()) {           
+					    AbstractButton ab = enums.nextElement();    
+					    JRadioButton jb = (JRadioButton)ab; 				 
+					    if(jb.isSelected())
+					    	gender = jb.getText().trim(); //getText() 메소드로 문자열 받아낸다.
+					}// end of while
+					
+					if(gender.equals("남")){
+						genderCode =1;
+					}else if(gender.equals("여")){
+						genderCode=2;
+					}
+					
+					newEmp.setGender(genderCode);
+					
+					switch (comboBoxDept.getSelectedIndex()) {
+					case 0:
+						newEmp.setDno(1);
+						break;
+					
+					case 1:
+						newEmp.setDno(2);
+						break;
+					
+					case 2:
+						newEmp.setDno(3);
+						break;
+					
+					case 3:
+						newEmp.setDno(4);
+						break;
+						
+					case 4:
+						newEmp.setDno(5);
 
-				default:
-					break;
-				}// end of switch
-				
-				String inputDate = tfDate.getText();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				Date userDate;
-				try {
-					userDate = dateFormat.parse(inputDate);
-					newEmp.setJoindate(userDate);
-				} catch (ParseException e) {
-					e.printStackTrace();
+					default:
+						break;
+					}// end of switch
+					
+					String inputDate = tfDate.getText();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+					Date userDate;
+					try {
+						userDate = dateFormat.parse(inputDate);
+						newEmp.setJoindate(userDate);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					
+					int res = employeeService.insertEmployee(newEmp);
+					
+					DefaultTableModel m = new DefaultTableModel(row(),col());
+					jTable.setModel(m);
+					
+					//사원추가후 입력필드 초기화
+					clearField();
+					
+				}else if(btnAdd.getText() == "수정"){
+					//수정 이벤트
+					//사원정보 update하기
+					Employee updEmp = new Employee();
+					updEmp.setEno(Integer.parseInt(tfNum.getText()));
+					updEmp.setEname(tfName.getText());
+					
+					switch (comboBoxPosition.getSelectedIndex()) {
+					case 0:
+						updEmp.setTitle(1);
+						break;
+						
+					case 1:
+						updEmp.setTitle(2);
+						break;
+						
+					case 2:
+						updEmp.setTitle(3);
+						break;
+						
+					case 3:
+						updEmp.setTitle(4);
+						break;	
+					
+					case 4:
+						updEmp.setTitle(5);
+						break;	
+
+					default:
+						break;
+					}// end of switch
+					
+					updEmp.setSalary(Integer.parseInt(spinnerPay.getValue().toString()));
+					
+					Enumeration<AbstractButton> enums = groupGender.getElements();
+					
+					while(enums.hasMoreElements()) {           
+					    AbstractButton ab = enums.nextElement();    
+					    JRadioButton jb = (JRadioButton)ab; 				 
+					    if(jb.isSelected())
+					    	gender = jb.getText().trim(); //getText() 메소드로 문자열 받아낸다.
+					}// end of while
+					
+					if(gender.equals("남")){
+						genderCode =1;
+					}else if(gender.equals("여")){
+						genderCode=2;
+					}
+					
+					updEmp.setGender(genderCode);
+					
+					switch (comboBoxDept.getSelectedIndex()) {
+					case 0:
+						updEmp.setDno(1);
+						break;
+					
+					case 1:
+						updEmp.setDno(2);
+						break;
+					
+					case 2:
+						updEmp.setDno(3);
+						break;
+					
+					case 3:
+						updEmp.setDno(4);
+						break;
+						
+					case 4:
+						updEmp.setDno(5);
+
+					default:
+						break;
+					}// end of switch
+					
+					String inputDate = tfDate.getText();
+					SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+					Date userDate;
+					try {
+						userDate = dateFormat.parse(inputDate);
+						updEmp.setJoindate(userDate);
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+					
+					int res = employeeService.updateEmployee(updEmp);
+					DefaultTableModel m = new DefaultTableModel(row(),col());
+					jTable.setModel(m);
+					
+					//사원 수정 후 입력필드 초기화
+					clearField();
+					
+					//수정버튼 다시 추가로 바꾸기
+					btnAdd.setText("추가");				
 				}
+					
 				
-				int res = employeeService.insertEmployee(newEmp);
+				jTable.setComponentPopupMenu(popupMenu);
 				
-				//사원추가후 입력필드 초기화
-				clearField();
-				
-				//사원목록 갱신
-				loadList();
-				
-				
+				jTable.addMouseListener(new MouseListener() {
+					
+					@Override
+					public void mouseReleased(MouseEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void mousePressed(MouseEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void mouseExited(MouseEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void mouseEntered(MouseEvent e) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						if(e.getButton() ==3) //마우스 오른쪽 버튼이면
+				        {
+							jTable.setComponentPopupMenu(popupMenu);
+				        }
+						
+					}
+				});
 			}// end of btnAdd.addActionListener
 		});
+		
 		btnAdd.setBounds(226, 270, 97, 23);
 		contentPane.add(btnAdd);
 		
@@ -322,11 +469,101 @@ public class EmployeeUI extends JFrame {
 		comboBoxDept.setBounds(286, 182, 200, 21);
 		contentPane.add(comboBoxDept);
 		
-		loadList();
+		scpane = new JScrollPane();
+		contentPane.add(scpane);
+		
+		jTable = new JTable(tableModel);
+		tableModel = new DefaultTableModel(row(), col());
+		scpane.setViewportView(jTable);
+		jTable.setModel(tableModel);
+		
+		
+		scpane.setLocation(12, 325);
+		scpane.setSize(683, 269);
+		
+		
+		//수정, 삭제 팝업메뉴
+		popupMenu.add(modifyMenu);
+		popupMenu.add(deleteMenu);
+		jTable.setComponentPopupMenu(popupMenu);
+		
+		modifyMenu.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				
+				//추가버튼 수정으로 바꾸기
+				btnAdd.setText("수정");
+				
+				//선택한 사원으로 필드 갱신
+				int row = jTable.getSelectedRow();
+				Employee findEmp = empList.get(row);
+				
+				tfNum.setText(String.valueOf(findEmp.getEno()));
+				tfName.setText(findEmp.getEname());
+				spinnerPay.setValue(findEmp.getSalary());
+				tfDate.setText(dateFormat.format(findEmp.getJoindate()));
+				
+				int genderCode = findEmp.getGender();
+				if(genderCode==1){
+					radioMale.setSelected(true);
+				}else{
+					radioFemale.setSelected(true);
+				}
+				
+				switch (findEmp.getTitle()) {
+				case 1:comboBoxPosition.setSelectedIndex(0);
+					break;
+				case 2:comboBoxPosition.setSelectedIndex(1);
+					break;
+				case 3:comboBoxPosition.setSelectedIndex(2);
+					break;
+				case 4:comboBoxPosition.setSelectedIndex(3);
+					break;
+				case 5:comboBoxPosition.setSelectedIndex(4);
+					break;
+				}
+				
+				switch (findEmp.getDno()) {
+				case 1:comboBoxDept.setSelectedIndex(0);
+					break;
+				case 2:comboBoxDept.setSelectedIndex(1);
+					break;
+				case 3:comboBoxDept.setSelectedIndex(2);
+					break;
+				case 4:comboBoxDept.setSelectedIndex(3);
+					break;
+				case 5:comboBoxDept.setSelectedIndex(4);
+					break;
+				}
+				
+			}
+		});
+		
+		deleteMenu.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int row = jTable.getSelectedRow();
+				
+				Employee selEmp = empList.get(row);
+				
+				employeeService.deleteEmployee(selEmp.getEno());
+				
+				DefaultTableModel m = new DefaultTableModel(row(),col());
+				jTable.setModel(m);
+				JOptionPane.showMessageDialog(null, "삭제되었습니다.");
+			}
+		});
+
 		
 	}
 	
 	public void clearField(){
+		Employee lastEmp = employeeService.findLastEmployee();
+		int nextEno = lastEmp.getEno()+1;
+		tfNum.setText(String.valueOf(nextEno));
 		tfName.setText("");
 		spinnerPay.setValue(1500000);
 		radioMale.setSelected(true);
@@ -335,20 +572,18 @@ public class EmployeeUI extends JFrame {
 		comboBoxDept.setSelectedIndex(0);
 	}
 	
-	public void loadList(){
-		List<Employee> empList = employeeService.findAllEmployee();
+	
+	private String[][] row(){
+		empList = employeeService.findAllEmployee();
 		String[][] rowDatas = new String[empList.size()][];
 		for(int i=0;i<rowDatas.length;i++){
 			rowDatas[i] = empList.get(i).toArray();
 		}
-		
+		return rowDatas;
+	}
+	
+	private String[] col(){
 		String columnNames[] = {"번호","사원명","직책","급여","성별","부서","입사일"};
-		
-		tableModel = new DefaultTableModel(rowDatas, columnNames);
-		jTable = new JTable(tableModel);
-		scpane = new JScrollPane(jTable);
-		scpane.setLocation(12, 325);
-		scpane.setSize(683, 269);
-		contentPane.add(scpane);
+		return columnNames;
 	}
 }
